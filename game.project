@@ -1,0 +1,20 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /render/default.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 640
+height = 640
+
+[android]
+input_method = HiddenInputField
+
+[project]
+title = Cube_Jumper
+
+[input]
+game_binding = /builtins/input/all.input_bindingc
+

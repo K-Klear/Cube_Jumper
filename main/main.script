@@ -1,0 +1,162 @@
+local inputs = {}
+local walk_speed = 5
+local map = {{}, {}, {}, {}, {}, {}}
+local face_map = {1, 2, 3, 4, 5, 6}
+
+local map_size = 5
+
+function init(self)
+	msg.post("/cam_3d#cam_3d", hash("acquire_camera_focus"))
+	msg.post(".", hash("acquire_input_focus"))
+	msg.post("@render:", "use_camera_projection")
+	--go.animate("/cube", "euler.y", go.PLAYBACK_LOOP_PINGPONG, 360, go.EASING_LINEAR, 5)
+	--msg.post("/map", hash("disable"))
+	
+	local face_offset_x = {-5, 0, 5, 10, 0, 0}
+	local face_offset_y = {0, 0, 0, 0, 5, -5}
+	
+	for face = 1, 6 do
+		for x = 1, 5 do
+			map[face][x] = {}
+			for y = 1, 5 do
+				map[face][x][y] = tilemap.get_tile("/map#level_01", "layer", x + face_offset_x[face], y + face_offset_y[face])
+			end
+		end
+	end
+	self.current_face = hash("front")
+	self.zoom = 2.2
+end
+
+function rotate_CCW_90(m)
+	local rotated = {}
+	for c, m_1_c in ipairs(m[1]) do
+		local col = {m_1_c}
+		for r = 2, #m do
+			col[r] = m[r][c]
+		end
+		table.insert(rotated, 1, col)
+	end
+	return rotated
+end
+
+function rotate_180(m)
+	return rotate_CCW_90(rotate_CCW_90(m))
+end
+
+function rotate_CW_90(m)
+	return rotate_CCW_90(rotate_CCW_90(rotate_CCW_90(m)))
+end
+
+local function redraw_map()
+	local face_offset_x = {-5, 0, 5, 10, 0, 0}
+	local face_offset_y = {0, 0, 0, 0, 5, -5}
+	for face = 1, 6 do
+		local current_face = face_map[face]
+		for x, val in pairs(map[current_face]) do
+			for y, v in pairs(val) do
+				tilemap.set_tile("/map#level_01", "layer", x + face_offset_x[face], y + face_offset_y[face], v)
+			end
+		end
+	end
+end
+
+local function check_edge(new_pos)
+	if new_pos.x > 640 then
+		local face_1 = face_map[1]
+		face_map[1] = face_map[2]
+		face_map[2] = face_map[3]
+		face_map[3] = face_map[4]
+		face_map[4] = face_1
+		map[face_map[5]] = rotate_CW_90(map[face_map[5]])
+		map[face_map[6]] = rotate_CCW_90(map[face_map[6]])
+		redraw_map()
+		new_pos.x = new_pos.x - 1280
+	elseif new_pos.x < -640 then
+		local face_1 = face_map[1]
+		face_map[1] = face_map[4]
+		face_map[4] = face_map[3]
+		face_map[3] = face_map[2]
+		face_map[2] = face_1
+		map[face_map[5]] = rotate_CCW_90(map[face_map[5]])
+		map[face_map[6]] = rotate_CW_90(map[face_map[6]])
+		redraw_map()
+		new_pos.x = new_pos.x + 1280
+	end
+	if new_pos.y > 640 then
+		local face_2 = face_map[2]
+		map[face_map[1]] = rotate_CW_90(map[face_map[1]])
+		face_map[2] = face_map[5]
+		map[face_map[3]] = rotate_CCW_90(map[face_map[3]])
+		face_map[4] = face_map[6]
+		face_map[5] = face_map[4]
+		face_map[6] = face_2
+		--map[face_map[6]] = rotate_180(map[face_map[6]])
+		redraw_map()
+		new_pos.y = new_pos.y - 1280
+	elseif new_pos.y < -640 then
+		new_pos.y = new_pos.y + 1280
+	end
+end
+
+
+
+function update(self, dt)
+	local movement_vec = vmath.vector3()
+	if inputs[hash("key_a")] then
+		movement_vec.x = movement_vec.x - walk_speed
+	end
+	if inputs[hash("key_d")] then
+		movement_vec.x = movement_vec.x + walk_speed
+	end
+	if inputs[hash("key_w")] then
+		movement_vec.y = movement_vec.y + walk_speed
+	end
+	if inputs[hash("key_s")] then
+		movement_vec.y = movement_vec.y - walk_speed
+	end
+	local new_pos = go.get_position() + movement_vec
+
+	--check_edge(new_pos)
+
+	if new_pos.x > 1920 then
+		self.current_face = hash("back")
+	elseif new_pos.x > 640 then
+		self.current_face = hash("right")
+	else
+		self.current_face = hash("front")
+	end
+	
+	go.set_position(new_pos)
+
+	print(self.current_face)
+	local player_pos = vmath.vector3(new_pos) / 1280
+	if self.current_face == hash("front") then
+		player_pos.z = 0.5
+	elseif self.current_face == hash("right") then
+		player_pos = vmath.vector3(0.5, player_pos.y, 1 - player_pos.x)
+	elseif self.current_face == hash("back") then
+		player_pos = vmath.vector3(2 - player_pos.x, player_pos.y, -0.5)
+	end
+
+	local cam_pos = vmath.normalize(player_pos) * self.zoom
+
+	local current_rot = go.get_rotation("/cam_3d")
+	local vec = vmath.rotate(current_rot, cam_pos + vmath.vector3(0, 0, self.zoom))
+	
+	local rota = vmath.quat_from_to(vmath.vector3(0, 0, -1), vmath.normalize(-cam_pos))
+	if vmath.length(vmath.vector3(0, 0, -1) + vmath.normalize(-cam_pos)) > 0 then
+		go.set_rotation(rota, "/cam_3d")
+	end
+
+	go.set("/cam_3d", "position", cam_pos)
+end
+
+function on_message(self, message_id, message, sender)
+	
+end
+
+function on_input(self, action_id, action)
+	if action_id then
+		inputs[action_id] = not action.released
+	end
+end
