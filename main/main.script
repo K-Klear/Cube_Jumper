@@ -60,38 +60,13 @@ local function redraw_map()
 	end
 end
 
-local function check_edge(new_pos)
+local function check_edge(self, new_pos)
 	if new_pos.x > 640 then
-		local face_1 = face_map[1]
-		face_map[1] = face_map[2]
-		face_map[2] = face_map[3]
-		face_map[3] = face_map[4]
-		face_map[4] = face_1
-		map[face_map[5]] = rotate_CW_90(map[face_map[5]])
-		map[face_map[6]] = rotate_CCW_90(map[face_map[6]])
-		redraw_map()
 		new_pos.x = new_pos.x - 1280
 	elseif new_pos.x < -640 then
-		local face_1 = face_map[1]
-		face_map[1] = face_map[4]
-		face_map[4] = face_map[3]
-		face_map[3] = face_map[2]
-		face_map[2] = face_1
-		map[face_map[5]] = rotate_CCW_90(map[face_map[5]])
-		map[face_map[6]] = rotate_CW_90(map[face_map[6]])
-		redraw_map()
 		new_pos.x = new_pos.x + 1280
 	end
 	if new_pos.y > 640 then
-		local face_2 = face_map[2]
-		map[face_map[1]] = rotate_CW_90(map[face_map[1]])
-		face_map[2] = face_map[5]
-		map[face_map[3]] = rotate_CCW_90(map[face_map[3]])
-		face_map[4] = face_map[6]
-		face_map[5] = face_map[4]
-		face_map[6] = face_2
-		--map[face_map[6]] = rotate_180(map[face_map[6]])
-		redraw_map()
 		new_pos.y = new_pos.y - 1280
 	elseif new_pos.y < -640 then
 		new_pos.y = new_pos.y + 1280
@@ -114,9 +89,12 @@ function update(self, dt)
 	if inputs[hash("key_s")] then
 		movement_vec.y = movement_vec.y - walk_speed
 	end
+
 	local new_pos = go.get_position() + movement_vec
 
-	--check_edge(new_pos)
+
+	check_edge(self, new_pos)
+
 
 	if new_pos.x > 1920 then
 		self.current_face = hash("back")
@@ -128,26 +106,48 @@ function update(self, dt)
 	
 	go.set_position(new_pos)
 
-	print(self.current_face)
-	local player_pos = vmath.vector3(new_pos) / 1280
-	if self.current_face == hash("front") then
-		player_pos.z = 0.5
-	elseif self.current_face == hash("right") then
-		player_pos = vmath.vector3(0.5, player_pos.y, 1 - player_pos.x)
-	elseif self.current_face == hash("back") then
-		player_pos = vmath.vector3(2 - player_pos.x, player_pos.y, -0.5)
-	end
-
+	local player_pos = vmath.vector3(new_pos) / 640
+	player_pos.z = 1
 	local cam_pos = vmath.normalize(player_pos) * self.zoom
 
-	local current_rot = go.get_rotation("/cam_3d")
-	local vec = vmath.rotate(current_rot, cam_pos + vmath.vector3(0, 0, self.zoom))
-	
-	local rota = vmath.quat_from_to(vmath.vector3(0, 0, -1), vmath.normalize(-cam_pos))
-	if vmath.length(vmath.vector3(0, 0, -1) + vmath.normalize(-cam_pos)) > 0 then
-		go.set_rotation(rota, "/cam_3d")
+
+	local mod
+	local dist_x = math.abs(player_pos.x)
+	local dist_y = math.abs(player_pos.y)
+
+	local thing = dist_x - dist_y
+
+	--thing = 0 ... 0
+	--thing = 1 ... 15
+	--thing = -1 ... -15
+
+	if dist_x > dist_y then
+		mod = 15
+	else
+		mod = -15
 	end
 
+	local dist_line = dist_x - dist_y
+	local dist_from_x = 1 - dist_x
+
+	print(dist_from_x, dist_line)
+
+	
+	
+	
+
+	
+	local test = (player_pos.x * player_pos.y) * math.rad(mod)
+	
+	--test = (player_pos.x * math.rad(-15) * player_pos.y * math.rad(15))
+	
+
+	local rotation_adjust = vmath.quat_axis_angle(vmath.vector3(0, 0, 1), test)
+	local cam_rotation = vmath.quat_from_to(vmath.vector3(0, 0, -1), vmath.normalize(-cam_pos)) * rotation_adjust
+	
+	if vmath.length(vmath.vector3(0, 0, -1) + vmath.normalize(-cam_pos)) > 0 then
+		go.set("/cam_3d", "rotation", cam_rotation)
+	end
 	go.set("/cam_3d", "position", cam_pos)
 end
 
