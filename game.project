@@ -18,6 +18,3 @@ title = Cube_Jumper
 [input]
 game_binding = /builtins/input/all.input_bindingc
 
-[physics]
-debug = 0
-
