@@ -1,6 +1,6 @@
 name: "main"
 instances {
-  id: "cube_y"
+  id: "cube"
   prototype: "/main/cube.go"
   position {
     x: 0.0
@@ -25,21 +25,6 @@ embedded_instances {
   data: "components {\n"
   "  id: \"level_01\"\n"
   "  component: \"/main/level_01.tilemap\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: -0.5\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  "components {\n"
-  "  id: \"gui\"\n"
-  "  component: \"/main/gui.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"
   "    y: 0.0\n"
@@ -80,8 +65,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: -480.0
-    y: -480.0
+    x: 480.0
+    y: 480.0
     z: 0.0
   }
   rotation {
@@ -91,8 +76,8 @@ embedded_instances {
     w: 1.0
   }
   scale3 {
-    x: 1.0
-    y: 1.0
+    x: 0.625
+    y: 0.625
     z: 1.0
   }
 }
@@ -180,9 +165,9 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 167.0
-    y: 170.0
-    z: 0.0
+    x: -665.0
+    y: 480.0
+    z: 0.1
   }
   rotation {
     x: 0.0
@@ -191,14 +176,29 @@ embedded_instances {
     w: 1.0
   }
   scale3 {
-    x: 1.0
-    y: 1.0
+    x: 0.625
+    y: 0.625
     z: 1.0
   }
 }
 embedded_instances {
   id: "cam_3d"
-  data: "embedded_components {\n"
+  data: "components {\n"
+  "  id: \"gui\"\n"
+  "  component: \"/main/gui.gui\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
   "  id: \"cam_3d\"\n"
   "  type: \"camera\"\n"
   "  data: \"aspect_ratio: 1.0\\n"
@@ -224,27 +224,6 @@ embedded_instances {
     x: 0.0
     y: 0.0
     z: 2.2
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "cube_x"
-  children: "cube_y"
-  data: ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
   }
   rotation {
     x: 0.0

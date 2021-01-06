@@ -67,7 +67,7 @@ local function render_2d(self)
     render.disable_state(render.STATE_CULL_FACE)
 
     self.projection_fn = fixed_projection
-    render.set_projection(fixed_projection(-1, 1, 1/9))
+    render.set_projection(fixed_projection(-1, 1, 1/5))
     render.set_view(vmath.matrix4())
 
     render.draw(self.tile_pred)
@@ -101,20 +101,18 @@ function init(self)
 
     local res_size = math.min(render.get_width(), render.get_height())
 
-    local test = 2/3
+    local zoom = 1/2
 
     for face = 1, 6 do
         self.faces.view[face] = vmath.matrix4()
         self.faces.view[face].c0 = vmath.vector4(1, 0, 0, 0)
         self.faces.view[face].c1 = vmath.vector4(0, 1, 0, 0)
         self.faces.view[face].c2 = vmath.vector4(0, 0, 1, 0)
-        self.faces.view[face].c3 = vmath.vector4(2720 - (face * 1280), 160, -0, test)
-        print(face, 1440 - (face * 1280))
+        self.faces.view[face].c3 = vmath.vector4(1680 - (960 * face), -240, 0, zoom)
     end
 
-
-    self.faces.view[5].c3 = vmath.vector4(res_size / 2, -960, -0, test)
-    self.faces.view[6].c3 = vmath.vector4(res_size / 2, 1600, -0, test)
+    self.faces.view[5].c3 = vmath.vector4(-240, -240 - 960, 0, zoom)
+    self.faces.view[6].c3 = vmath.vector4(-240, -240 + 960, 0, zoom)
     
 
     self.view = vmath.matrix4()
