@@ -1,3 +1,5 @@
+local CUBE = require("modules.cube")
+
 function init(self)
 	msg.post("/cam_3d#cam_3d", hash("acquire_camera_focus"))
 	msg.post("@render:", "use_camera_projection")
@@ -8,12 +10,27 @@ function init(self)
 	}
 
 	local level = 2
+	local tilemap_size = 256 * levels[level].size
+	local scale = CUBE.screen_size / tilemap_size
+
+	local map_object = factory.create(levels[level].factory, vmath.vector3(CUBE.screen_size / 2, CUBE.screen_size / 2, 0))
+	local tm = msg.url(nil, map_object, "layout")
 	
-	local screen_size = window.get_size()
-	local scale = screen_size / (256 * levels[level].size)
+	self.face_offset_x = {-3, -1,  1,  3, -1, -1}
+	self.face_offset_y = {-1, -1, -1, -1,  1, -3}
+	for key, val in pairs(CUBE.faces) do
+		self.face_offset_x[key] = self.face_offset_x[key] * (levels[level].size / 2)
+		self.face_offset_y[key] = self.face_offset_y[key] * (levels[level].size / 2)
+		CUBE.tilemap[val] = factory.create("#map_part", CUBE.position[val], nil, nil, vmath.vector3(scale, scale, 1))
+		for x = 1, levels[level].size do
+			for y = 1, levels[level].size do
+				local tile = tilemap.get_tile(tm, "layer", x + self.face_offset_x[key], y + self.face_offset_y[key])
+				tilemap.set_tile(msg.url(nil, CUBE.tilemap[val], "map_base"), "layer", x, y, tile)
+			end
+		end
+	end
 
-	self.map_object = factory.create(levels[level].factory, vmath.vector3(screen_size / 2, screen_size / 2, 0), nil, nil, vmath.vector3(scale, scale, 1))
-	local tilemap = msg.url(nil, self.map_object, "layout")
+	self.player_object = factory.create("#player", vmath.vector3(480, 480, 0.5), nil, nil, vmath.vector3(scale, scale, 1))
 
-	self.player_object = factory.create("#player", vmath.vector3(480, 480, 0.5), nil, {tilemap = tilemap, map_size = levels[level].size}, vmath.vector3(scale, scale, 1))
+	go.delete(map_object)
 end

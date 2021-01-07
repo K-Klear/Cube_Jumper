@@ -22,57 +22,57 @@ convex_hulls {
 }
 convex_hulls {
   index: 12
-  count: 0
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 16
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 20
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 24
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 28
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 32
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 36
+  count: 4
   collision_group: "solid"
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 40
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 44
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 48
+  count: 4
   collision_group: ""
 }
 convex_hulls {
-  index: 12
-  count: 0
+  index: 52
+  count: 4
   collision_group: ""
 }
 collision_groups: "solid"
